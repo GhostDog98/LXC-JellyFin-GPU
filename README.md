@@ -204,6 +204,12 @@ This will bring up the `Create: LXC Container`
 
 Hit finish!
 
+
+### Help!!! I created my container as an unprivileged Container!
+Simply go to backup, create a backup, then restore that same backup.
+When restoring, you should be presented with the tickbox again!
+
+
 ## Editing the container for passthrough
 When the container is done being created, we need to go back to your main node console. We still have to make some changes to allow the GPU to be passed through. This is where your input is going to be needed.
 ## Do **NOT** copy my settings exactly! These numbers are going to be different for your system. I will show what my config looks like but be sure to change these values.
