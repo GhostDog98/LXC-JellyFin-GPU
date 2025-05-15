@@ -38,23 +38,10 @@ Once added, go into the updates menu and click `Refresh`. This will load any/or 
 Reboot the node after updates are completed.
 
 ## Checking Headers and Blocking Nouveau
-Once the node has booted back up we want to double check the headers are up to date and that it was propperly installed. To do this:
+Once the node has booted back up we want to double check the headers are up to date and that it was propperly installed, alongside all of the deps for this tutorial. To do this:
 ```
-uname -r
-```
-This should return (or something similar - systems will vary):
-```
-root@pve:~# uname -r
-5.15.74-1-pve
-```
-To make sure we got what we need - lets run:
-```
-apt-cache search pve-header
-```
-This will return a big list of all the available headers. Remember the updates we did in the previous step? That updated us to the most recent kernel for our system. Sometimes, not *everything* gets downloaded and/or installed properly. 
-The trick here is matching what was returned when doing `uname -r` and **NOT** going with the latest number you see. In this scenario, I want `pve-headers-5.15.74-1-pve` so I'm going to run:
-```
-apt install pve-headers-5.15.74-1-pve
+dpkg --add-architecture i386
+apt install pve-headers-$(uname -r) build-essential dkms libc6:i386
 ```
 ![image](https://i.imgur.com/t5MndtW.png)
 
@@ -75,14 +62,10 @@ Then:
 ```
 update-initramfs -u
 ```
-This will take a minute to update. Once done - reboot the node.
+This will take a minute to update. Once done - reboot the node. If this fails with `Couldn't find EFI system partition. It is recommended to mount it to /boot or /efi.`, follow the instructions [here](https://forum.proxmox.com/threads/couldnt-find-efi-system-partition-it-is-recommended-to-mount-it-to-boot-or-efi.145850/)
 
 ## Installing Dependencies and Installing Nvidia drivers
-Once the node has booted back up - we need some dependencies to build the drivers. Run:
-```
-apt install build-essential
-```
-When that's done.. Now it's time to get your **specific drivers**. Head on over to [Nvidia drivers](https://www.nvidia.com/Download/index.aspx).
+Now it's time to get your **specific drivers**. Head on over to [Nvidia drivers](https://www.nvidia.com/Download/index.aspx).
 For my GTX 970 I'm going to select:
 ```
 Product Type: Geforce
@@ -107,7 +90,7 @@ NVIDIA-Linux-x86_64-515.86.01.run
 ```
 Now that we have the driver downloaded, we have to make the installer executable. To do this:
 ```
-chmod +x <file> -should look like- chmod +x NVIDIA-Linux-x86_64-515.86.01.run
+chmod +x NVIDIA-Linux-x86_64-515.86.01.run
 ```
 > ### Pro tip - Type out chmod +x then type out capital `N` then press `Tab`. It'll autofill the file name for you.
 Next - put a `./` in front of your file to run it. Should Look like this:
@@ -160,7 +143,7 @@ Regenerate the kernel initramfs:
 ```
 update-initramfs -u
 ```
-After that’s done, reboot the node. Repeat the driver install.
+After that’s done, reboot the node. Repeat the driver install. If this fails with `Couldn't find EFI system partition. It is recommended to mount it to /boot or /efi.`, follow the instructions [here](https://forum.proxmox.com/threads/couldnt-find-efi-system-partition-it-is-recommended-to-mount-it-to-boot-or-efi.145850/)
 
 ## Config files 
 After the reboot, make sure the drivers are still loaded by
@@ -191,7 +174,7 @@ Add these lines
 ```
 KERNEL=="nvidia", RUN+="/bin/bash -c '/usr/bin/nvidia-smi -L && /bin/chmod 666 /dev/nvidia*'"
 KERNEL=="nvidia_modeset", RUN+="/bin/bash -c '/usr/bin/nvidia-modprobe -c0 -m && /bin/chmod 666 /dev/nvidia-modeset*'"
-KERNEL=="nvidia_uvm", RUN+="/bin/bash -c '/usr/bin/nvidia-modprobe -c0 -u && /bin/chmod 666 /dev/nvidia-uvm*'
+KERNEL=="nvidia_uvm", RUN+="/bin/bash -c '/usr/bin/nvidia-modprobe -c0 -u && /bin/chmod 666 /dev/nvidia-uvm*'"
 ```
 ![image](https://i.imgur.com/8UAEmJI.png)
 > These udev rules are setting the permissions and calling for the module files to be loaded into the kernel since this wasn't done by the nvidia driver installer.
