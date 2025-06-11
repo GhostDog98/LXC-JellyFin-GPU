@@ -282,6 +282,21 @@ Once the driver install opens the only new message will be:
 WARNING: You specified the '--no-kernel-module' command line option...
 ```
 Just hit `OK` and proceed with the driver install like we did previously. When the installer is done, reboot the container.
+
+## Help! The NVIDIA installer says `Unable to find a suitable destination to install 32-bit compatibility libraries`
+To fix this, you need to add the i386 packages.
+```
+dpkg --add-architecture i386
+apt update && apt upgrade -y libc6:i386
+```
+Then reboot the installer.
+
+## Help! The installer says `This NVIDIA driver package includes Vulkan components`...
+Run `apt install -y libvulkan1`
+
+## Help! Unable to determine the path to install the libglvnd EGL vendor library config files.
+Run `apt install pkg-config libglvnd-dev`
+
 After reboot log back in as `root`. Run the `nvidia-smi` command.
 
 ![image](https://i.imgur.com/BFVo8nl.png)
